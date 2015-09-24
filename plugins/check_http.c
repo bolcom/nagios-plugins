@@ -218,7 +218,7 @@ process_arguments (int argc, char **argv)
     {"authorization", required_argument, 0, 'a'},
     {"proxy-authorization", required_argument, 0, 'b'},
     {"header-string", required_argument, 0, 'd'},
-    {"accept-string", required_argument, 0, 't'},
+    {"accept-string", required_argument, 0, 'z'},
     {"string", required_argument, 0, 's'},
     {"expect", required_argument, 0, 'e'},
     {"regex", required_argument, 0, 'r'},
@@ -1039,8 +1039,7 @@ check_http (void)
     }
   }
 
-  /* Inform server we accept any MIME type response
-  */
+  /* Inform the server of the MIME type(s) we accept */
   xasprintf(&buf, "%sAccept: %s\r\n", buf, accept_header);
 
   /* optionally send any other header tag */
@@ -1663,8 +1662,8 @@ print_help (void)
   printf ("    %s\n", _("Username:password on proxy-servers with basic authentication"));
   printf (" %s\n", "-A, --useragent=STRING");
   printf ("    %s\n", _("String to be sent in http header as \"User Agent\""));
-  printf (" %s\n", "-z, --accept=STRING");
-  printf ("    %s\n", _("Specify Accept header. Default is Accept: */*"));
+  printf (" %s\n", "-z, --accept-string=STRING");
+  printf ("    %s\n", _("Specify Accept header. Default is \"*/*\""));
   printf (" %s\n", "-k, --header=STRING");
   printf ("    %s\n", _("Any other tags to be sent in http header. Use multiple times for additional headers"));
   printf (" %s\n", "-E, --extended-perfdata");
@@ -1740,5 +1739,5 @@ print_usage (void)
   printf ("       [-e <expect>] [-d string] [-s string] [-l] [-r <regex> | -R <case-insensitive regex>]\n");
   printf ("       [-P string] [-m <min_pg_size>:<max_pg_size>] [-4|-6] [-N] [-M <age>]\n");
   printf ("       [-A string] [-k string] [-S <version>] [--sni] [-C <warn_age>[,<crit_age>]]\n");
-  printf ("       [-T <content-type>] [-z <accept string] [-j method]\n");
+  printf ("       [-T <content-type>] [-z <accept string>] [-j method]\n");
 }
