@@ -1,5 +1,5 @@
-#ifndef NP_UTILS_H
-#define NP_UTILS_H
+#ifndef NP_UTILS_H_INCLUDED
+#define NP_UTILS_H_INCLUDED
 /* Header file for nagios plugins utils.c */
 
 /* This file should be included in all plugins */
@@ -90,6 +90,8 @@ void usage5(void) __attribute__((noreturn));
 void usage_va(const char *fmt, ...) __attribute__((noreturn));
 
 const char *state_text (int);
+
+int parse_timeout_string (char *timeout_str);
 
 #define max(a,b) (((a)>(b))?(a):(b))
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -211,4 +213,4 @@ The nagios plugins come with ABSOLUTELY NO WARRANTY. You may redistribute\n\
 copies of the plugins under the terms of the GNU General Public License.\n\
 For more information about these matters, see the file named COPYING.\n")
 
-#endif /* NP_UTILS_H */
+#endif /* NP_UTILS_H_INCLUDED */

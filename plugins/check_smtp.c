@@ -131,7 +131,17 @@ main (int argc, char **argv)
 	struct timeval tv;
 
 	/* Catch pipe errors in read/write - sometimes occurs when writing QUIT */
+#ifdef HAVE_SIGACTION
+	struct sigaction sig_action;
+
+	sig_action.sa_sigaction = NULL;
+	sig_action.sa_handler = SIG_IGN;
+	sigemptyset(&sig_action.sa_mask);
+	sig_action.sa_flags = 0;
+	sigaction(SIGPIPE, &sig_action, NULL);
+#else /* HAVE_SIGACTION */
 	(void) signal (SIGPIPE, SIG_IGN);
+#endif /* HAVE_SIGACTION */
 
 	setlocale (LC_ALL, "");
 	bindtextdomain (PACKAGE, LOCALEDIR);
@@ -231,7 +241,7 @@ main (int argc, char **argv)
 		  send(sd, SMTP_STARTTLS, strlen(SMTP_STARTTLS), 0);
 
 		  recvlines(buffer, MAX_INPUT_BUFFER); /* wait for it */
-		  if (!strstr (buffer, server_expect)) {
+		  if (!strstr (buffer, SMTP_EXPECT)) {
 		    printf (_("Server does not support STARTTLS\n"));
 		    smtp_quit();
 		    return STATE_UNKNOWN;
@@ -276,6 +286,7 @@ main (int argc, char **argv)
 #  ifdef USE_OPENSSL
 		  if ( check_cert ) {
                     result = np_net_ssl_check_cert(days_till_exp_warn, days_till_exp_crit);
+		    smtp_quit();
 		    my_close();
 		    return result;
 		  }
@@ -576,11 +587,6 @@ process_arguments (int argc, char **argv)
 		case 't':									/* timeout */
 			timeout_interval = parse_timeout_string (optarg);
 			break;
-		case 'S':
-		/* starttls */
-			use_ssl = TRUE;
-			use_ehlo = TRUE;
-			break;
 		case 'D':
 		/* Check SSL cert validity */
 #ifdef USE_OPENSSL
@@ -602,9 +608,14 @@ process_arguments (int argc, char **argv)
                             days_till_exp_warn = atoi (optarg);
                         }
 			check_cert = TRUE;
+			ignore_send_quit_failure = TRUE;
 #else
 			usage (_("SSL support not available - install OpenSSL and recompile"));
 #endif
+		case 'S':
+		/* starttls */
+			use_ssl = TRUE;
+			use_ehlo = TRUE;
 			break;
 		case '4':
 			address_family = AF_INET;

@@ -28,8 +28,8 @@
 * 
 *****************************************************************************/
 
-#ifndef _NETUTILS_H_
-#define _NETUTILS_H_
+#ifndef NAGIOS_NETUGILS_H_INCLUDED_
+#define NAGIOS_NETUGILS_H_INCLUDED_
 
 #include "common.h"
 #include "utils.h"
@@ -89,6 +89,16 @@ RETSIGTYPE socket_timeout_alarm_handler (int) __attribute__((noreturn));
 
 /* SSL-Related functionality */
 #ifdef HAVE_SSL
+#  define MP_SSLv2 1
+#  define MP_SSLv3 2
+#  define MP_TLSv1 3
+#  define MP_TLSv1_1 4
+#  define MP_TLSv1_2 5
+#  define MP_SSLv2_OR_NEWER 6
+#  define MP_SSLv3_OR_NEWER 7
+#  define MP_TLSv1_OR_NEWER 8
+#  define MP_TLSv1_1_OR_NEWER 9
+#  define MP_TLSv1_2_OR_NEWER 10
 /* maybe this could be merged with the above np_net_connect, via some flags */
 int np_net_ssl_init(int sd);
 int np_net_ssl_init_with_hostname(int sd, char *host_name);
@@ -100,4 +110,4 @@ int np_net_ssl_read(void *buf, int num);
 int np_net_ssl_check_cert(int days_till_exp_warn, int days_till_exp_crit);
 #endif /* HAVE_SSL */
 
-#endif /* _NETUTILS_H_ */
+#endif /* NAGIOS_NETUGILS_H_INCLUDED_ */

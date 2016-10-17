@@ -144,8 +144,6 @@ usage5 (void)
 void
 print_revision (const char *command_name, const char *revision)
 {
-	char plugin_revision[STRLEN];
-
 	printf ("%s v%s (%s %s)\n",
 	         command_name, revision, PACKAGE, VERSION);
 }
@@ -170,9 +168,28 @@ state_text (int result)
 void
 timeout_alarm_handler (int signo)
 {
+	const char msg[] = " - Plugin timed out\n";
 	if (signo == SIGALRM) {
-		printf (_("%s - Plugin timed out after %d seconds\n"),
-						state_text(timeout_state), timeout_interval);
+/*		printf (_("%s - Plugin timed out after %d seconds\n"),
+						state_text(timeout_state), timeout_interval); */
+		switch(timeout_state) {
+			case STATE_OK:
+				write(STDOUT_FILENO, "OK", 2);
+				break;
+			case STATE_WARNING:
+				write(STDOUT_FILENO, "WARNING", 7);
+				break;
+			case STATE_CRITICAL:
+				write(STDOUT_FILENO, "CRITICAL", 8);
+				break;
+			case STATE_DEPENDENT:
+				write(STDOUT_FILENO, "DEPENDENT", 9);
+				break;
+			default:
+				write(STDOUT_FILENO, "UNKNOWN", 7);
+				break;
+		}
+		write(STDOUT_FILENO, msg, sizeof(msg) - 1);
 		exit (timeout_state);
 	}
 }
@@ -657,6 +674,46 @@ char *fperfdata (const char *label,
 
 	if (critp)
 		xasprintf (&data, "%s%f", data, crit);
+
+	xasprintf (&data, "%s;", data);
+
+	if (minp)
+		xasprintf (&data, "%s%f", data, minv);
+
+	if (maxp) {
+		xasprintf (&data, "%s;", data);
+		xasprintf (&data, "%s%f", data, maxv);
+	}
+
+	return data;
+}
+
+char *sperfdata (const char *label,
+ double val,
+ const char *uom,
+ char *warn,
+ char *crit,
+ int minp,
+ double minv,
+ int maxp,
+ double maxv)
+{
+	char *data = NULL;
+	if (strpbrk (label, "'= "))
+		xasprintf (&data, "'%s'=", label);
+	else
+		xasprintf (&data, "%s=", label);
+
+	xasprintf (&data, "%s%f", data, val);
+	xasprintf (&data, "%s%s;", data, uom);
+
+	if (warn!=NULL)
+		xasprintf (&data, "%s%s", data, warn);
+
+	xasprintf (&data, "%s;", data);
+
+	if (crit!=NULL)
+		xasprintf (&data, "%s%s", data, crit);
 
 	xasprintf (&data, "%s;", data);
 
